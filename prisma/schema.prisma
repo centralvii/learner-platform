@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  tags        String[]
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  chapters    Chapter[]
+  
+  @@map("courses")
+}
+
+model Chapter {
+  id       String @id @default(cuid())
+  courseId String @map("course_id")
+  title    String
+  order    Int
+  
+  course   Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons  Lesson[]
+  
+  @@map("chapters")
+}
+
+model Lesson {
+  id          String  @id @default(cuid())
+  chapterId   String  @map("chapter_id")
+  title       String
+  content     String? // markdown/html content
+  videoUrl    String? @map("video_url")
+  attachments String[] // array of file URLs/paths
+  order       Int
+  
+  chapter     Chapter    @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  progress    Progress[]
+  notes       Note[]
+  bookmarks   Bookmark[]
+  
+  @@map("lessons")
+}
+
+model Progress {
+  id        String   @id @default(cuid())
+  lessonId  String   @map("lesson_id")
+  completed Boolean  @default(false)
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  @@map("progress")
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  lessonId  String   @map("lesson_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  @@map("notes")
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  lessonId  String   @map("lesson_id")
+  title     String   // user-defined bookmark title
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  @@map("bookmarks")
+}
