@@ -1,10 +1,20 @@
-"use client"
+'use client'
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { BookOpen, GraduationCap, FileText, Bookmark } from "lucide-react"
+
+interface Course {
+  id: string;
+  title: string;
+}
+
+interface Note {
+  id: string;
+  content: string;
+  lesson: { title: string };
+}
 
 interface ProgressData {
   totalCourses: number
@@ -13,6 +23,8 @@ interface ProgressData {
   totalNotes: number
   totalBookmarks: number
   progressPercentage: number
+  recentCourses: Course[];
+  recentNotes: Note[];
 }
 
 export default function Home() {
@@ -45,6 +57,10 @@ export default function Home() {
               <div className="bg-gray-200 rounded-lg h-32"></div>
             </div>
           ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="animate-pulse bg-gray-200 rounded-lg h-48"></div>
+            <div className="animate-pulse bg-gray-200 rounded-lg h-48"></div>
         </div>
       </div>
     )
@@ -119,13 +135,25 @@ export default function Home() {
           <CardHeader>
             <CardTitle>Последние курсы</CardTitle>
             <CardDescription>
-              Курсы, которые вы недавно просматривали
+              Курсы, которые вы недавно создали
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              Нет недавно просматриваемых курсов
-            </div>
+            {stats?.recentCourses && stats.recentCourses.length > 0 ? (
+              <ul className="space-y-2">
+                {stats.recentCourses.map(course => (
+                  <li key={course.id}>
+                    <Link href={`/courses/${course.id}`} className="font-semibold hover:underline">
+                      {course.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                Нет недавно созданных курсов
+              </div>
+            )}
           </CardContent>
         </Card>
         
@@ -137,9 +165,20 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              Нет недавних заметок
-            </div>
+            {stats?.recentNotes && stats.recentNotes.length > 0 ? (
+              <ul className="space-y-4">
+                {stats.recentNotes.map(note => (
+                  <li key={note.id} className="text-sm">
+                    <p className="font-semibold truncate">{note.content}</p>
+                    <p className="text-xs text-muted-foreground">к уроку: {note.lesson.title}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                Нет недавних заметок
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

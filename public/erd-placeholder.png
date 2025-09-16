@@ -1,0 +1,51 @@
+<svg width="450" height="350" viewBox="0 0 450 350" fill="none" xmlns="http://www.w3.org/2000/svg">
+<style>
+    .table-name { font: bold 14px sans-serif; fill: #cbd5e1; }
+    .col-name { font: 12px sans-serif; fill: #94a3b8; }
+    .col-type { font: 12px sans-serif; fill: #64748b; }
+    .line { stroke: #475569; stroke-width:1; }
+    .bg { fill: #1e293b; }
+</style>
+
+<rect width="450" height="350" fill="#0f172a" />
+
+<!-- Users Table -->
+<rect x="20" y="20" width="120" height="80" rx="5" class="bg" stroke="#334155" />
+<text x="30" y="35" class="table-name">users</text>
+<line x1="25" y1="45" x2="135" y2="45" class="line" />
+<text x="30" y="60" class="col-name">id</text>
+<text x="90" y="60" class="col-type">INT</text>
+<text x="30" y="75" class="col-name">name</text>
+<text x="90" y="75" class="col-type">TEXT</text>
+<text x="30" y="90" class="col-name">email</text>
+<text x="90" y="90" class="col-type">TEXT</text>
+
+<!-- Products Table -->
+<rect x="20" y="150" width="120" height="80" rx="5" class="bg" stroke="#334155" />
+<text x="30" y="165" class="table-name">products</text>
+<line x1="25" y1="175" x2="135" y2="175" class="line" />
+<text x="30" y="190" class="col-name">id</text>
+<text x="90" y="190" class="col-type">INT</text>
+<text x="30" y="205" class="col-name">name</text>
+<text x="90" y="205" class="col-type">TEXT</text>
+<text x="30" y="220" class="col-name">price</text>
+<text x="90" y="220" class="col-type">INT</text>
+
+<!-- Orders Table -->
+<rect x="200" y="85" width="150" height="95" rx="5" class="bg" stroke="#334155" />
+<text x="210" y="100" class="table-name">orders</text>
+<line x1="205" y1="110" x2="345" y2="110" class="line" />
+<text x="210" y="125" class="col-name">id</text>
+<text x="290" y="125" class="col-type">INT</text>
+<text x="210" y="140" class="col-name">user_id</text>
+<text x="290" y="140" class="col-type">INT (FK)</text>
+<text x="210" y="155" class="col-name">product_id</text>
+<text x="290" y="155" class="col-type">INT (FK)</text>
+<text x="210" y="170" class="col-name">quantity</text>
+<text x="290" y="170" class="col-type">INT</text>
+
+<!-- Relationships -->
+<path d="M140 65 C 170 65, 170 140, 200 140" fill="none" class="line" />
+<path d="M140 195 C 170 195, 170 155, 200 155" fill="none" class="line" />
+
+</svg>

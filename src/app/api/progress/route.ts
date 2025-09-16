@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const body = await request.json()
     const { lessonId, completed } = body
@@ -53,13 +53,30 @@ export async function GET() {
 
     const progressPercentage = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
 
+    const recentCourses = await prisma.course.findMany({
+      take: 3,
+      orderBy: { createdAt: 'desc' },
+    })
+
+    const recentNotes = await prisma.note.findMany({
+      take: 3,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        lesson: {
+          select: { title: true }
+        }
+      }
+    })
+
     return NextResponse.json({
       totalCourses,
       totalLessons,
       completedLessons,
       totalNotes,
       totalBookmarks,
-      progressPercentage
+      progressPercentage,
+      recentCourses,
+      recentNotes
     })
   } catch (error) {
     console.error('Error fetching progress:', error)
