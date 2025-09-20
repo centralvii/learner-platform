@@ -21,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru">
-      <body className={`${inter.className} antialiased`} suppressHydrationWarning={true}>
+      <body className={`${inter.className} antialiased`}>
         {children}
       </body>
     </html>

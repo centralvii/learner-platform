@@ -10,8 +10,9 @@ async function executeQuery(query: string) {
     }
 }
 
-export async function POST(request: Request, { params }: { params: { taskId: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ taskId: string }> }) {
   try {
+    const { taskId } = await params;
     const body = await request.json()
     const { code } = body
 
@@ -19,7 +20,7 @@ export async function POST(request: Request, { params }: { params: { taskId: str
       return NextResponse.json({ error: 'Code is required' }, { status: 400 })
     }
 
-    const task = await prisma.sandboxTask.findUnique({ where: { id: params.taskId } });
+    const task = await prisma.sandboxTask.findUnique({ where: { id: taskId } });
     if (!task) {
         return NextResponse.json({ error: 'Task not found' }, { status: 404 });
     }
@@ -39,7 +40,7 @@ export async function POST(request: Request, { params }: { params: { taskId: str
 
     await prisma.sandboxSubmission.create({
         data: {
-            taskId: params.taskId,
+            taskId: taskId,
             code,
             isCorrect,
         }
@@ -48,7 +49,7 @@ export async function POST(request: Request, { params }: { params: { taskId: str
     return NextResponse.json({ isCorrect, result: userResult });
 
   } catch (error) {
-    console.error(`Error submitting solution for task ${params.taskId}:`, error)
+    console.error(`Error submitting solution for task`, error)
     return NextResponse.json({ error: 'Failed to submit solution' }, { status: 500 })
   }
 }

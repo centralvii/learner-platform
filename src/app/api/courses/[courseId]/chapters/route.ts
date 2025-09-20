@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function POST(request: Request, { params }: { params: { courseId: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ courseId: string }> }) {
   try {
+    const { courseId } = await params;
     const body = await request.json()
     const { title } = body
 
@@ -12,7 +13,7 @@ export async function POST(request: Request, { params }: { params: { courseId: s
 
     // Get the highest order number for existing chapters in the course
     const lastChapter = await prisma.chapter.findFirst({
-      where: { courseId: params.courseId },
+      where: { courseId },
       orderBy: { order: 'desc' },
     });
 
@@ -21,14 +22,14 @@ export async function POST(request: Request, { params }: { params: { courseId: s
     const chapter = await prisma.chapter.create({
       data: {
         title,
-        courseId: params.courseId,
+        courseId,
         order: newOrder,
       },
     })
 
     return NextResponse.json(chapter, { status: 201 })
   } catch (error) {
-    console.error(`Error creating chapter for course ${params.courseId}:`, error)
+    console.error(`Error creating chapter for course`, error)
     return NextResponse.json({ error: 'Failed to create chapter' }, { status: 500 })
   }
 }

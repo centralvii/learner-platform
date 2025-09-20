@@ -75,7 +75,7 @@ export function Sidebar() {
     return (
         <div
             className={cn(
-                'flex h-full flex-col bg-gray-50 dark:bg-gray-900 transition-all duration-300',
+                'flex h-full flex-col bg-gray-50  transition-all duration-300',
                 isCollapsed ? 'w-20' : 'w-64'
             )}
         >
@@ -93,7 +93,7 @@ export function Sidebar() {
                         height={30}
                     />
                     {!isCollapsed && (
-                        <h1 className="text-xl font-bold text-gray-900 dark:text-white transition-opacity duration-300 delay-150 opacity-100">
+                        <h1 className="text-xl font-bold text-gray-900 transition-opacity duration-300 delay-150 opacity-100">
                             Vibe Learn
                         </h1>
                     )}
@@ -116,16 +116,16 @@ export function Sidebar() {
                                             ? 'justify-center h-10'
                                             : 'gap-x-3',
                                         isActive
-                                            ? 'bg-gray-200 text-gray-900 dark:bg-gray-800 dark:text-white'
-                                            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800'
+                                            ? 'bg-gray-200 text-gray-900  '
+                                            : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100 '
                                     )}
                                 >
                                     <item.icon
                                         className={cn(
                                             'h-6 w-6 shrink-0 transition-colors',
                                             isActive
-                                                ? 'text-gray-900 dark:text-white'
-                                                : 'text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white'
+                                                ? 'text-gray-900 '
+                                                : 'text-gray-400 group-hover:text-gray-900 '
                                         )}
                                         aria-hidden="true"
                                     />
@@ -149,7 +149,7 @@ export function Sidebar() {
                         variant="ghost"
                         onClick={() => setIsCollapsed(!isCollapsed)}
                         className={cn(
-                            'w-full text-gray-700 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800',
+                            'w-full text-gray-700 hover:text-gray-900 hover:bg-gray-100 ',
                             isCollapsed ? 'justify-center' : 'justify-start'
                         )}
                     >
@@ -163,7 +163,7 @@ export function Sidebar() {
                         variant="ghost"
                         onClick={handleLogout}
                         className={cn(
-                            'w-full text-gray-700 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-800',
+                            'w-full text-gray-700 hover:text-gray-900 hover:bg-gray-100 ',
                             isCollapsed
                                 ? 'justify-center'
                                 : 'justify-start gap-x-3'

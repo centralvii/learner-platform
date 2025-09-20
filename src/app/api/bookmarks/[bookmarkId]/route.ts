@@ -1,20 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { bookmarkId: string } }
-) {
+export async function DELETE(request: Request, { params }: { params: { bookmarkId: string } }) {
   try {
-    const { bookmarkId } = params
-
     await prisma.bookmark.delete({
-      where: { id: bookmarkId }
+      where: { id: params.bookmarkId },
     })
 
-    return NextResponse.json({ success: true })
+    return new NextResponse(null, { status: 204 })
   } catch (error) {
-    console.error('Error deleting bookmark:', error)
+    console.error(`Error deleting bookmark ${params.bookmarkId}:`, error)
     return NextResponse.json({ error: 'Failed to delete bookmark' }, { status: 500 })
   }
 }

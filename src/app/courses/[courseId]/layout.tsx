@@ -1,60 +1,51 @@
-'use client'
+'use client';
 
-import { CourseSidebar } from "@/components/courses/course-sidebar";
-import { useState, useEffect } from "react";
-import { CourseContext } from "@/contexts/course-context";
-import { useParams } from 'next/navigation';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { CourseContext } from '@/contexts/course-context';
+import { useParams, usePathname } from 'next/navigation';
+import { CourseSidebar } from '@/components/courses/course-sidebar';
+import { LessonSidebar } from '@/components/lesson-sidebar';
+import { cn } from '@/lib/utils';
+import { SlidingSidebar } from '@/components/sliding-sidebar';
+import { CourseNotesSidebar } from '@/components/course-notes-sidebar';
 
-interface Lesson {
-    id: string
-    title: string
-    completed: boolean
-  }
-  
-  interface Chapter {
-    id: string
-    title: string
-    lessons: Lesson[]
-  }
-  
-  interface Course {
-    id: string
-    title: string
-    description: string
-    chapters: Chapter[]
-    tags: string[]
-  }
+// ... (interfaces)
 
-export default function CourseLayout({ 
-    children
+export default function CourseLayout({
+    children,
 }: {
-    children: React.ReactNode
+    children: React.ReactNode;
 }) {
     const params = useParams();
+    const pathname = usePathname();
     const courseId = params.courseId as string;
     const [course, setCourse] = useState<Course | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isCourseNavOpen, setIsCourseNavOpen] = useState(false);
+    const [isNotesSidebarOpen, setIsNotesSidebarOpen] = useState(false);
+    const lessonSidebarRef = useRef<HTMLElement>(null);
 
+    const isLessonPage = pathname.includes('/lessons/');
+
+    // ... (fetchCourse and updateLessonCompletion)
     const fetchCourse = () => {
         if (courseId) {
             setLoading(true);
             fetch(`/api/courses/${courseId}`)
-                .then(res => res.json())
-                .then(data => {
+                .then((res) => res.json())
+                .then((data) => {
                     setCourse(data);
                     setLoading(false);
                 })
-                .catch(err => {
+                .catch((err) => {
                     console.error('Error fetching course:', err);
                     setLoading(false);
                 });
         }
-    }
-
+    };
     useEffect(() => {
         fetchCourse();
     }, [courseId]);
-
     const updateLessonCompletion = (lessonId: string, completed: boolean) => {
         if (course) {
             const newCourse = { ...course };
@@ -68,34 +59,73 @@ export default function CourseLayout({
             }
             setCourse(newCourse);
         }
-    }
+    };
 
-    if (loading) {
+    const handleToggleCourseNav = useCallback(() => {
+        setIsCourseNavOpen((prev) => !prev);
+    }, []);
+
+    const handleToggleNotes = useCallback(() => {
+        setIsNotesSidebarOpen((prev) => !prev);
+    }, []);
+
+    if (loading || !course) {
         return (
-            <div className="flex h-screen">
-              <div className="w-80 h-full bg-gray-100 animate-pulse"></div>
-              <div className="flex-1 p-6">
-                <div className="animate-pulse">
-                  <div className="h-8 bg-gray-200 rounded w-2/3 mb-4"></div>
-                  <div className="space-y-4">
-                    <div className="bg-gray-200 rounded-lg h-64"></div>
-                    <div className="bg-gray-200 rounded-lg h-32"></div>
-                  </div>
-                </div>
-              </div>
+            <div className="h-screen w-full flex items-center justify-center">
+                <p>Загрузка курса...</p>
             </div>
-          )
-    }
-
-    if (!course) {
-        return <div className="p-6 text-center">Курс не найден.</div>
+        );
     }
 
     return (
-        <CourseContext.Provider value={{ course, setCourse, updateLessonCompletion }}>
+        <CourseContext.Provider
+            value={{ course, setCourse, updateLessonCompletion }}
+        >
             <div className="flex h-screen">
-                <CourseSidebar course={course} />
-                <main className="flex-1 overflow-auto">
+                {isLessonPage ? (
+                    <LessonSidebar
+                        ref={lessonSidebarRef}
+                        isCourseNavOpen={isCourseNavOpen}
+                        isNotesOpen={isNotesSidebarOpen}
+                        onToggleCourseNav={handleToggleCourseNav}
+                        onToggleNotes={handleToggleNotes}
+                        courseId={course.id}
+                    />
+                ) : (
+                    <CourseSidebar course={course} />
+                )}
+
+                {isLessonPage && (
+                    <>
+                        <SlidingSidebar
+                            isOpen={isCourseNavOpen}
+                            onClose={() => setIsCourseNavOpen(false)}
+                            excludeRef={lessonSidebarRef}
+                        >
+                            <CourseSidebar course={course} />
+                        </SlidingSidebar>
+                        <SlidingSidebar
+                            isOpen={isNotesSidebarOpen}
+                            onClose={() => setIsNotesSidebarOpen(false)}
+                            excludeRef={lessonSidebarRef}
+                            disableOutsideClick={true}
+                            disableBackdrop={true}
+                            hasRightBorder={true}
+                        >
+                            <CourseNotesSidebar
+                                courseId={course.id}
+                                onClose={() => setIsNotesSidebarOpen(false)}
+                            />
+                        </SlidingSidebar>
+                    </>
+                )}
+
+                <main
+                    className={cn(
+                        'flex-1 overflow-auto',
+                        isLessonPage ? 'pl-16' : ''
+                    )}
+                >
                     {children}
                 </main>
             </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Bookmark } from 'lucide-react'
+import { DeleteConfirmationDialog } from '@/components/courses/delete-confirmation-dialog'
 
 interface BookmarkItem {
   id: string
@@ -16,7 +17,8 @@ export default function BookmarksPage() {
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const fetchBookmarks = () => {
+    setLoading(true);
     fetch('/api/bookmarks')
       .then(res => res.json())
       .then(data => {
@@ -27,7 +29,16 @@ export default function BookmarksPage() {
         console.error('Error fetching bookmarks:', err)
         setLoading(false)
       })
+  }
+
+  useEffect(() => {
+    fetchBookmarks()
   }, [])
+
+  const handleDeleteBookmark = async (bookmarkId: string) => {
+    await fetch(`/api/bookmarks/${bookmarkId}`, { method: 'DELETE' });
+    fetchBookmarks();
+  }
 
   return (
     <div className="p-6">
@@ -48,10 +59,13 @@ export default function BookmarksPage() {
           {bookmarks.map(bookmark => (
             <Card key={bookmark.id}>
               <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <Bookmark className="h-5 w-5 mr-2" /> 
-                  {bookmark.title}
-                </CardTitle>
+                <div className="flex justify-between items-start">
+                    <CardTitle className="text-lg flex items-center">
+                      <Bookmark className="h-5 w-5 mr-2" /> 
+                      {bookmark.title}
+                    </CardTitle>
+                    <DeleteConfirmationDialog onDelete={() => handleDeleteBookmark(bookmark.id)} itemName="закладку" />
+                </div>
                 <CardDescription>{bookmark.lessonTitle} / {bookmark.courseTitle}</CardDescription>
               </CardHeader>
               <CardContent>

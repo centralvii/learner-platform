@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { DeleteConfirmationDialog } from '@/components/courses/delete-confirmation-dialog'
 
 interface Note {
   id: string
@@ -15,7 +16,8 @@ export default function NotesPage() {
   const [notes, setNotes] = useState<Note[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const fetchNotes = () => {
+    setLoading(true);
     fetch('/api/notes')
       .then(res => res.json())
       .then(data => {
@@ -26,7 +28,16 @@ export default function NotesPage() {
         console.error('Error fetching notes:', err)
         setLoading(false)
       })
+  }
+
+  useEffect(() => {
+    fetchNotes()
   }, [])
+
+  const handleDeleteNote = async (noteId: string) => {
+    await fetch(`/api/notes/${noteId}`, { method: 'DELETE' });
+    fetchNotes();
+  }
 
   return (
     <div className="p-6">
@@ -47,8 +58,13 @@ export default function NotesPage() {
           {notes.map(note => (
             <Card key={note.id}>
               <CardHeader>
-                <CardTitle className="text-lg">{note.lessonTitle}</CardTitle>
-                <CardDescription>{note.courseTitle}</CardDescription>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <CardTitle className="text-lg">{note.lessonTitle}</CardTitle>
+                        <CardDescription>{note.courseTitle}</CardDescription>
+                    </div>
+                    <DeleteConfirmationDialog onDelete={() => handleDeleteNote(note.id)} itemName="заметку" />
+                </div>
               </CardHeader>
               <CardContent>
                 <p className="text-sm">{note.content}</p>

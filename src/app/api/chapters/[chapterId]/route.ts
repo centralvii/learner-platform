@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function PUT(request: Request, { params }: { params: { chapterId: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ chapterId: string }> }) {
   try {
+    const { chapterId } = await params;
     const body = await request.json()
     const { title, order } = body
 
@@ -11,26 +12,27 @@ export async function PUT(request: Request, { params }: { params: { chapterId: s
     if (order) data.order = order
 
     const chapter = await prisma.chapter.update({
-      where: { id: params.chapterId },
+      where: { id: chapterId },
       data,
     })
 
     return NextResponse.json(chapter)
   } catch (error) {
-    console.error(`Error updating chapter ${params.chapterId}:`, error)
+    console.error(`Error updating chapter`, error)
     return NextResponse.json({ error: 'Failed to update chapter' }, { status: 500 })
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { chapterId: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ chapterId: string }> }) {
   try {
+    const { chapterId } = await params;
     await prisma.chapter.delete({
-      where: { id: params.chapterId },
+      where: { id: chapterId },
     })
 
     return new NextResponse(null, { status: 204 })
   } catch (error) {
-    console.error(`Error deleting chapter ${params.chapterId}:`, error)
+    console.error(`Error deleting chapter`, error)
     return NextResponse.json({ error: 'Failed to delete chapter' }, { status: 500 })
   }
 }

@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Edit } from 'lucide-react'
+import { Progress } from '@/components/ui/progress'
 
 interface Lesson {
     id: string;
@@ -34,6 +35,7 @@ export function EditLessonDialog({ lesson, onLessonUpdated }: EditLessonDialogPr
   const [content, setContent] = useState(lesson.content || '')
   const [videoUrl, setVideoUrl] = useState(lesson.videoUrl || '')
   const [loading, setLoading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
 
   useEffect(() => {
     setTitle(lesson.title)
@@ -41,16 +43,44 @@ export function EditLessonDialog({ lesson, onLessonUpdated }: EditLessonDialogPr
     setVideoUrl(lesson.videoUrl || '')
   }, [lesson])
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', '/api/upload', true)
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percentComplete = (event.loaded / event.total) * 100
+        setUploadProgress(percentComplete)
+      }
+    }
+
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        const response = JSON.parse(xhr.responseText)
+        setVideoUrl(response.url)
+      } else {
+        console.error('Upload failed')
+      }
+      setUploadProgress(0)
+    }
+
+    xhr.send(formData)
+  }
+
   const handleSubmit = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/lessons/${lesson.id}`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, content, videoUrl }),
-        }
-      )
+      const response = await fetch(`/api/lessons/${lesson.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content, videoUrl }),
+      })
 
       if (response.ok) {
         const updatedLesson = await response.json();
@@ -97,6 +127,19 @@ export function EditLessonDialog({ lesson, onLessonUpdated }: EditLessonDialogPr
             </Label>
             <Input id="videoUrl" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} className="col-span-3" />
           </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="videoFile" className="text-right">
+              Видео-файл
+            </Label>
+            <Input id="videoFile" type="file" onChange={handleFileChange} className="col-span-3" />
+          </div>
+          {uploadProgress > 0 && (
+            <div className="grid grid-cols-4 items-center gap-4">
+                <div className="col-start-2 col-span-3">
+                    <Progress value={uploadProgress} />
+                </div>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button type="submit" onClick={handleSubmit} disabled={loading}>
